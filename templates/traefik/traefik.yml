@@ -6,7 +6,6 @@ entryPoints:
 
 api:
   dashboard: true
-  insecure: true
 
 providers:
   file:

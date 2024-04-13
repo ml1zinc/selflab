@@ -26,7 +26,7 @@ database:
   txn_limit: 10000
   args:
     user: ${MATRIX_POSTGRES_USER}
-    password: ${MATRIX_POSTGRES_USER_PASSWORD}
+    password: ${MATRIX_DB_ROLE_PASSWORD}
     database: ${MATRIX_POSTGRES_DB}
     host: ${POSTGRES_HOST}
     port: ${POSTGRES_PORT}

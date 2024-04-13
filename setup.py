@@ -104,7 +104,7 @@ def main():
     copy('traefik/traefik.yml', env)
     copy('traefik/usersfile', env)
     copy('traefik/config/middlewares.yml', env)
-    copy('traefik/config/routers.yml', env, is_template=False)
+    copy('traefik/config/routers.yml', env)
     copy('traefik/config/tls.yml', env, is_template=False)
 
     # matrix

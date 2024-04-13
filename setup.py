@@ -61,7 +61,7 @@ def copy(file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=
             with dst.open('w') as d:
                 if is_template:
                     t = Template(s.read())
-                    d.write(t.substitute(env))
+                    d.write(t.safe_substitute(env))
                 else:
                     d.write(s.read())
             dst.chmod(mode)
@@ -112,10 +112,10 @@ def main():
     copy('matrix/synapse/homeserver.yaml', env)
 
     # matrix nginx
-    mkdir('matrix/nginx/www')
+    mkdir('matrix/nginx/www/.well-known')
     copy('matrix/nginx/matrix.conf', env)
     copy('matrix/nginx/www/.well-known/client', env)
-    copy('matrix/nginx/www/.well-knownserver', env)
+    copy('matrix/nginx/www/.well-known/server', env)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,3 @@
+{
+  "m.server": "synapse.${DOMAIN_NAME}:443"
+}

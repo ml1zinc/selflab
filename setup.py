@@ -93,6 +93,29 @@ def main():
 
     env['T_ADMIN_PASSWORD_HASH'] = create_password(env['T_ADMIN_PASSWORD'])
 
+    # postgres
+    mkdir('postgres/data')
+    mkdir('postgres/init')
+    copy('postgres/init/services.sql', env)
+
+    # traefik
+    mkdir('traefik/config')
+    touch('traefik/acme.json', mode=0o600)
+    copy('traefik/traefik.yml', env)
+    copy('traefik/usersfile', env)
+    copy('traefik/config/middlewares.yml', env)
+    copy('traefik/config/routers.yml', env, is_template=False)
+    copy('traefik/config/tls.yml', env, is_template=False)
+
+    # matrix
+    mkdir('matrix/synapse')
+    copy('matrix/synapse/homeserver.yaml', env)
+
+    # matrix nginx
+    mkdir('matrix/nginx/www')
+    copy('matrix/nginx/matrix.conf', env)
+    copy('matrix/nginx/www/.well-known/client', env)
+    copy('matrix/nginx/www/.well-knownserver', env)
 
 
 if __name__ == '__main__':

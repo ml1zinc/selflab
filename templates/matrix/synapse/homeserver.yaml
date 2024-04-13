@@ -1,0 +1,49 @@
+server_name: "${DOMAIN_NAME}"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: ${SYNAPSE_HTTP_PORT}
+    tls: false
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+
+federation_ip_range_blacklist:
+  - '127.0.0.0/8'
+  - '10.0.0.0/8'
+  - '172.16.0.0/12'
+  - '192.168.0.0/16'
+  - '100.64.0.0/10'
+  - '169.254.0.0/16'
+  - '::1/128'
+  - 'fe80::/64'
+  - 'fc00::/7'
+
+          
+database:
+  name: psycopg2
+  txn_limit: 10000
+  args:
+    user: ${MATRIX_POSTGRES_USER}
+    password: ${MATRIX_DB_ROLE_PASSWORD}
+    database: ${MATRIX_POSTGRES_DB}
+    host: ${POSTGRES_HOST}
+    port: ${POSTGRES_PORT}
+    cp_min: 5
+    cp_max: 10
+
+log_config: "/data/${DOMAIN_NAME}.log.config"
+
+media_store_path: /data/media_store
+registration_shared_secret: "1D~aZ4E@wPDh~hq7mqI&^4HhoYNR.9FN.zK0cfhgg-FmVRy4BW"
+report_stats: true
+macaroon_secret_key: "#akaB;dak=r:aL7cK==MQPbid&KjCXs~,pHw:^q#gb3LAO.AUp"
+form_secret: "LAJ~inz~~dBbfokK~-w:vubX&lq6oLXMvDMgR.M^2#@r~26&dW"
+signing_key_path: "/data/${DOMAIN_NAME}.signing.key"
+trusted_key_servers:
+  - server_name: "matrix.org"
+
+
+# vim:ft=yaml
+

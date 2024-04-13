@@ -10,6 +10,8 @@ http:
 
     dashbord:
       rule: "Host(`traefik.${DOMAIN_NAME}`)"
-      service: "api@internal"
+      entrypoints:
+        - "web"
+      service: api@internal
       middlewares:
-        - "basicauth"
+        - basicauth

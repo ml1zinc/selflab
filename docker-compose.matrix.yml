@@ -2,8 +2,8 @@
 
 networks:
   default:  
-    external: true
-    name: "${EXTERNAL_NETWORK}"
+    # external: true
+    name: "${INTERNAL_NETWORK}"
 
 services:
   synapse:

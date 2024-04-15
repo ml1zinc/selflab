@@ -112,10 +112,10 @@ def main():
     copy('matrix/synapse/homeserver.yaml', env)
 
     # matrix nginx
-    mkdir('matrix/nginx/www/.well-known')
+    mkdir('matrix/nginx/www/.well-known/matrix')
     copy('matrix/nginx/matrix.conf', env)
-    copy('matrix/nginx/www/.well-known/client', env)
-    copy('matrix/nginx/www/.well-known/server', env)
+    copy('matrix/nginx/www/.well-known/matrix/client', env)
+    copy('matrix/nginx/www/.well-known/matrix/server', env)
 
 
 if __name__ == '__main__':

@@ -8,10 +8,22 @@ http:
       rule: "HostRegexp(`{host:.+}`)"
       service: "noop@internal"
 
-    dashbord:
+    dashboard:
       rule: "Host(`traefik.${DOMAIN_NAME}`)"
-      entrypoints:
-        - "web"
-      service: api@internal
+      entryPoints:
+        - "web-secure"
+      tls:
+        certresolver: "letsencrypt"
+      service: "dashboard@internal"
       middlewares:
-        - basicauth
+        - "basicauth"
+
+    api:
+      rule: "Host(`traefik.${DOMAIN_NAME}`) && PathPrefix(`/api`)"
+      tls:
+        certresolver: "letsencrypt"
+      service: "api@internal"
+      middlewares:
+        - "basicauth"
+
+

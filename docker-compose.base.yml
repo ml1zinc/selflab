@@ -27,9 +27,6 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-      - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN_NAME}`)"
-      - "traefik.http.routers.traefik.entrypoints=web-secure"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
 
   postgres:
     image: "postgres:${POSTGRES_VERSION}"

@@ -1,4 +1,7 @@
 server_name: "${DOMAIN_NAME}"
+
+# public_baseurl: https://matrix.${DOMAIN_NAME}
+
 pid_file: /data/homeserver.pid
 listeners:
   - port: ${SYNAPSE_HTTP_PORT}

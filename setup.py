@@ -118,5 +118,8 @@ def main():
     copy('matrix/nginx/www/.well-known/matrix/server', env)
 
 
-if __name__ == '__main__':
+    # qbittorrent
+    mkdir("qbittorrent/config")
+
+if __name__ == "__main__":
     main()

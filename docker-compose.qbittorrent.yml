@@ -10,21 +10,21 @@ networks:
 
 services:
   qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
+    image: "lscr.io/linuxserver/qbittorrent:${QBITTORRENT_VERSION}"
     container_name: qbittorrent
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Etc/UTC
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ=Etc/UTC"
+      - "WEBUI_PORT=${WEBUI_PORT}"
+      - "TORRENTING_PORT=${TORRENTING_PORT}"
     volumes:
       - "./data/qbittorrent/config:/config"
       - "~/Downloads/:/downloads" #optional
       - "~/Videos/:/videos" #optional
     ports:
-      - "${WEBUI_PORT}:8080"
-      - "${TORRENTING_PORT}:6881"
-      - "${TORRENTING_PORT}:6881/udp"
+      - "${WEBUI_PORT}:${WEBUI_PORT}"
+      - "${TORRENTING_PORT}:${TORRENTING_PORT}"
+      - "${TORRENTING_PORT}:${TORRENTING_PORT}/udp"
     restart: unless-stopped
 

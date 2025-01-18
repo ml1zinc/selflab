@@ -2,7 +2,6 @@
 
 networks:
   default:  
-    # external: true
     name: "${INTERNAL_NETWORK}"
 
 services:

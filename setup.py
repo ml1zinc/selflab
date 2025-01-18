@@ -13,52 +13,54 @@ UID = 1000
 def load_env(path: Path) -> dict:
     env = {}
 
-    with path.open('r') as f:
+    with path.open("r") as f:
         for line in f:
-            if line.startswith('#'):
+            if line.startswith("#"):
                 continue
 
             elif line:
                 line = line.strip()
-                tokens = line.split('=', 1)
+                tokens = line.split("=", 1)
                 if len(tokens) == 2:
                     env[tokens[0].strip()] = tokens[1].strip()
     return env
 
 
 def gen_sample_env(path: Path) -> None:
-    with path.open('r') as env_f:
-        with (path.parent / '.env.sample').open('w') as env_sample_f:
+    with path.open("r") as env_f:
+        with (path.parent / ".env.sample").open("w") as env_sample_f:
             for line in env_f:
                 line = line.strip()
 
-                if line.startswith('#') or not line:
-                    env_sample_f.write(f'{line}\n')
+                if line.startswith("#") or not line:
+                    env_sample_f.write(f"{line}\n")
                     continue
 
-                tokens = line.split('=', 1)
+                tokens = line.split("=", 1)
                 if 0 < len(tokens) <= 2:
-                    env_sample_f.write(f'{tokens[0]}=\n')
+                    env_sample_f.write(f"{tokens[0]}=\n")
 
 
 def get_dst(path: str | Path) -> Path:
-    return ROOT_DIR / 'data' / path 
+    return ROOT_DIR / "data" / path
 
 
 def get_src(path: str | Path) -> Path:
-    return ROOT_DIR / 'templates' / path
+    return ROOT_DIR / "templates" / path
 
 
-def copy(file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=True) -> None:
+def copy(
+    file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=True
+) -> None:
     src = get_src(file)
     dst = get_dst(file)
     if not src.exists():
-        print(f'[ERROR] Template: {src} not exists.')
+        print(f"[ERROR] Template: {src} not exists.")
         return
 
     if not dst.exists():
         with src.open() as s:
-            with dst.open('w') as d:
+            with dst.open("w") as d:
                 if is_template:
                     t = Template(s.read())
                     d.write(t.safe_substitute(env))
@@ -71,7 +73,7 @@ def copy(file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=
 def touch(file: str | Path, uid=UID, gid=UID, mode=0o644):
     dst = get_dst(file)
     if not dst.exists():
-        open(dst, 'w').close()
+        open(dst, "w").close()
         dst.chmod(mode)
         os.chown(dst, uid, gid)
 
@@ -83,7 +85,7 @@ def mkdir(file: str | Path, uid=UID, gid=UID, mode=0o755):
 
 
 def create_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), SALT).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), SALT).decode("utf-8")
 
 
 def main():
@@ -93,29 +95,24 @@ def main():
 
     env['T_ADMIN_PASSWORD_HASH'] = create_password(env['T_ADMIN_PASSWORD'])
 
-    # postgres
-    mkdir('postgres/data')
-    mkdir('postgres/init')
-    copy('postgres/init/services.sql', env)
+    mkdir("traefik/config")
+    touch("traefik/acme.json", mode=0o600)
+    copy("traefik/traefik.yml", env)
+    copy("traefik/usersfile", env)
+    copy("traefik/config/middlewares.yml", env)
+    copy("traefik/config/routers.yml", env)
+    copy("traefik/config/tls.yml", env, is_template=False)
 
-    # traefik
-    mkdir('traefik/config')
-    touch('traefik/acme.json', mode=0o600)
-    copy('traefik/traefik.yml', env)
-    copy('traefik/usersfile', env)
-    copy('traefik/config/middlewares.yml', env)
-    copy('traefik/config/routers.yml', env)
-    copy('traefik/config/tls.yml', env, is_template=False)
 
     # matrix
-    mkdir('matrix/synapse')
-    copy('matrix/synapse/homeserver.yaml', env)
+    mkdir("matrix/synapse")
+    copy("matrix/synapse/homeserver.yaml", env)
 
     # matrix nginx
-    mkdir('matrix/nginx/www/.well-known/matrix')
-    copy('matrix/nginx/matrix.conf', env)
-    copy('matrix/nginx/www/.well-known/matrix/client', env)
-    copy('matrix/nginx/www/.well-known/matrix/server', env)
+    mkdir("matrix/nginx/www/.well-known/matrix")
+    copy("matrix/nginx/matrix.conf", env)
+    copy("matrix/nginx/www/.well-known/matrix/client", env)
+    copy("matrix/nginx/www/.well-known/matrix/server", env)
 
 
     # qbittorrent

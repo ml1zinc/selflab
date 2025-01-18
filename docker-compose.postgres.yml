@@ -1,0 +1,14 @@
+
+networks:
+  default:  
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  postgres:
+    image: "postgres:${POSTGRES_VERSION}"
+    restart: "always"
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    volumes:
+      - "./data/postgres/data:/var/lib/postgresql/data"
+

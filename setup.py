@@ -114,6 +114,52 @@ def mkdir(file: str | Path, uid=UID, gid=UID, mode=0o755):
 def create_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), SALT).decode("utf-8")
 
+
+class PostgresExecutor:
+    def __init__(self, env: dict):
+        self._env = env
+
+        self.host = env['POSTGRES_HOST']
+        self.port = env['POSTGRES_PORT']
+        self.db = env['POSTGRES_DB']
+        self.user = env['POSTGRES_USER']
+        self.password = env['POSTGRES_PASSWORD']
+
+    @contextmanager
+    def get_connection(self, db: str | None = None) -> Generator[connection, None, None]:
+        conn = psycopg2.connect(
+            host=self.host,
+            port=self.port,
+            user=self.user,
+            password=self.password,
+            database=db or self.db
+        )
+        try:
+            yield conn
+            conn.commit()
+        finally:
+            conn.close()
+
+    def _execute(self,
+                query: str,
+                params: tuple | None = None,
+                fetch: bool = True,
+                ) -> list[Any]:
+
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                if fetch:
+                    return cur.fetchall()
+                return []
+
+    def execute(self, query_template: str):
+        template = Template(query_template)
+        query = template.safe_substitute(self._env)
+        
+        self._execute(query, None, False)
+
+
 @service('postgres')
 def setup_postgres(env: dict):
     # postgres
@@ -158,6 +204,11 @@ def setup_matrix_db(env: dict):
     CREATE DATABASE ${MATRIX_POSTGRES_DB} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${MATRIX_POSTGRES_USER};
     GRANT ALL PRIVILEGES ON DATABASE ${MATRIX_POSTGRES_DB} TO ${MATRIX_POSTGRES_USER};
     """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
 @service('trilium')
 def setup_trilium(env):
     # trilium

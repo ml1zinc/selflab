@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
 
 from collections.abc import Callable
+from typing import Any, Generator
 import bcrypt
 import os
 from string import Template
 from pathlib import Path
 from argparse import ArgumentParser
 from functools import wraps
+from contextlib import contextmanager
+
+import psycopg2
+from psycopg2.extensions import connection
+
 
 ROOT_DIR = Path(__file__).parent
 SALT = bcrypt.gensalt()
@@ -109,7 +115,7 @@ def create_password(password: str) -> str:
     return bcrypt.hashpw(password.encode("utf-8"), SALT).decode("utf-8")
 
 @service('postgres')
-def setup_postgres(env):
+def setup_postgres(env: dict):
     # postgres
     mkdir("postgres/data")
     mkdir("postgres/init")
@@ -131,7 +137,7 @@ def setup_traefik(env):
 
 
 @service('matrix')
-def setup_matrix(env):
+def setup_matrix(env: dict):
     # matrix
     mkdir("matrix/synapse")
     copy("matrix/synapse/homeserver.yaml", env)
@@ -143,6 +149,15 @@ def setup_matrix(env):
     copy("matrix/nginx/www/.well-known/matrix/server", env)
 
 
+@service('matrix', DBS)
+def setup_matrix_db(env: dict):
+    query = """
+    CREATE ROLE ${MATRIX_POSTGRES_USER};
+    ALTER ROLE ${MATRIX_POSTGRES_USER} WITH PASSWORD '${MATRIX_DB_ROLE_PASSWORD}';
+    ALTER ROLE ${MATRIX_POSTGRES_USER} WITH LOGIN;
+    CREATE DATABASE ${MATRIX_POSTGRES_DB} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${MATRIX_POSTGRES_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${MATRIX_POSTGRES_DB} TO ${MATRIX_POSTGRES_USER};
+    """
 @service('trilium')
 def setup_trilium(env):
     # trilium
@@ -177,11 +192,15 @@ def main():
     if args.gen_sample_env:
         gen_sample_env(env_path)
 
-    service_to_setup = args.setup
-    if service_to_setup:
+    
+    if (service_to_setup := args.setup):
         for setup_func in SERVICES[service_to_setup]:
             setup_func(env)
 
+    
+    if (db_to_setup := args.setup_db):
+        for setup_db in DBS[db_to_setup]:
+            setup_db(env)
 
 if __name__ == "__main__":
     main()

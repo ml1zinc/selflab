@@ -24,9 +24,9 @@ DBS: dict[str, list[Callable]] = {'all': []}
 def service(service_name: str, service_dict: dict = SERVICES):
     def decorator(func):
         @wraps(func)
-        def wrapper():
+        def wrapper(*args, **kwargs):
             print(f'Setup {service_name}')
-            func()
+            func(*args, **kwargs)
             print(f'Complete {service_name}')
 
         services = service_dict.setdefault(service_name, [])
@@ -169,7 +169,7 @@ def setup_postgres(env: dict):
 
 
 @service('traefik')
-def setup_traefik(env):
+def setup_traefik(env: dict):
     # traefik
     env["T_ADMIN_PASSWORD_HASH"] = create_password(env["T_ADMIN_PASSWORD"])
 
@@ -210,13 +210,13 @@ def setup_matrix_db(env: dict):
 
 
 @service('trilium')
-def setup_trilium(env):
+def setup_trilium(env: dict):
     # trilium
-    mkdir("trilium/trilium-data")
+    mkdir("trilium/data")
 
 
 @service('qbittorrent')
-def setup_qbittorrent(env):
+def setup_qbittorrent(env: dict):
     # qbittorrent
     mkdir("qbittorrent/config")
 

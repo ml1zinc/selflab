@@ -1,0 +1,24 @@
+
+networks:
+  default:  
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  traefik:
+    image: "traefik:${TRAEFIK_VERSION}"
+    restart: "unless-stopped"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./data/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "./data/traefik/usersfile:/usersfile:ro"
+      - "./data/traefik/config:/config:ro"
+      - "./data/traefik/acme.json:/acme.json"
+    environment:
+      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+

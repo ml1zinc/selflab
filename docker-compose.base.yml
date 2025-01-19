@@ -8,33 +8,5 @@ networks:
      config:
        - subnet: "${SUBNET_AND_MASK}"
 
-services:
-
-  traefik:
-    image: "traefik:${TRAEFIK_VERSION}"
-    restart: "unless-stopped"
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./data/traefik/traefik.yml:/etc/traefik/traefik.yml:ro"
-      - "./data/traefik/usersfile:/usersfile:ro"
-      - "./data/traefik/config:/config:ro"
-      - "./data/traefik/acme.json:/acme.json"
-    environment:
-      - DUCKDNS_TOKEN=${DUCKDNS_TOKEN}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-
-  postgres:
-    image: "postgres:${POSTGRES_VERSION}"
-    restart: "always"
-    environment:
-      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
-    volumes:
-      - "./data/postgres/data:/var/lib/postgresql/data"
-      - "./data/postgres/init:/docker-entrypoint-initdb.d"
 
 

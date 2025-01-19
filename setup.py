@@ -1,64 +1,93 @@
 #!/usr/bin/env python3
 
+from collections.abc import Callable
+from typing import Any, Generator
 import bcrypt
 import os
 from string import Template
 from pathlib import Path
+from argparse import ArgumentParser
+from functools import wraps
+from contextlib import contextmanager
+
+import psycopg2
+from psycopg2.extensions import connection
+
 
 ROOT_DIR = Path(__file__).parent
 SALT = bcrypt.gensalt()
 UID = 1000
 
+SERVICES: dict[str, list[Callable]] = {'all': []}
+DBS: dict[str, list[Callable]] = {'all': []}
+
+def service(service_name: str, service_dict: dict = SERVICES):
+    def decorator(func):
+        @wraps(func)
+        def wrapper():
+            print(f'Setup {service_name}')
+            func()
+            print(f'Complete {service_name}')
+
+        services = service_dict.setdefault(service_name, [])
+        services.append(wrapper)
+
+        service_dict['all'].append(wrapper)
+
+        return wrapper
+    return decorator
 
 def load_env(path: Path) -> dict:
     env = {}
 
-    with path.open('r') as f:
+    with path.open("r") as f:
         for line in f:
-            if line.startswith('#'):
+            if line.startswith("#"):
                 continue
 
             elif line:
                 line = line.strip()
-                tokens = line.split('=', 1)
+                tokens = line.split("=", 1)
                 if len(tokens) == 2:
                     env[tokens[0].strip()] = tokens[1].strip()
     return env
 
 
 def gen_sample_env(path: Path) -> None:
-    with path.open('r') as env_f:
-        with (path.parent / '.env.sample').open('w') as env_sample_f:
+    with path.open("r") as env_f:
+        with (path.parent / ".env.sample").open("w") as env_sample_f:
             for line in env_f:
                 line = line.strip()
 
-                if line.startswith('#') or not line:
-                    env_sample_f.write(f'{line}\n')
+                if line.startswith("#") or not line:
+                    env_sample_f.write(f"{line}\n")
                     continue
 
-                tokens = line.split('=', 1)
+                tokens = line.split("=", 1)
                 if 0 < len(tokens) <= 2:
-                    env_sample_f.write(f'{tokens[0]}=\n')
+                    env_sample_f.write(f"{tokens[0]}=\n")
 
 
 def get_dst(path: str | Path) -> Path:
-    return ROOT_DIR / 'data' / path 
+    return ROOT_DIR / "data" / path
 
 
 def get_src(path: str | Path) -> Path:
-    return ROOT_DIR / 'templates' / path
+    return ROOT_DIR / "templates" / path
 
 
-def copy(file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=True) -> None:
+def copy(
+    file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=True
+) -> None:
     src = get_src(file)
     dst = get_dst(file)
     if not src.exists():
-        print(f'[ERROR] Template: {src} not exists.')
+        print(f"[ERROR] Template: {src} not exists.")
         return
 
     if not dst.exists():
         with src.open() as s:
-            with dst.open('w') as d:
+            with dst.open("w") as d:
                 if is_template:
                     t = Template(s.read())
                     d.write(t.safe_substitute(env))
@@ -71,7 +100,7 @@ def copy(file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=
 def touch(file: str | Path, uid=UID, gid=UID, mode=0o644):
     dst = get_dst(file)
     if not dst.exists():
-        open(dst, 'w').close()
+        open(dst, "w").close()
         dst.chmod(mode)
         os.chown(dst, uid, gid)
 
@@ -83,43 +112,147 @@ def mkdir(file: str | Path, uid=UID, gid=UID, mode=0o755):
 
 
 def create_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), SALT).decode('utf-8')
+    return bcrypt.hashpw(password.encode("utf-8"), SALT).decode("utf-8")
 
 
-def main():
-    env_path = ROOT_DIR / '.env'
-    env = load_env(env_path)
-    gen_sample_env(env_path)
+class PostgresExecutor:
+    def __init__(self, env: dict):
+        self._env = env
 
-    env['T_ADMIN_PASSWORD_HASH'] = create_password(env['T_ADMIN_PASSWORD'])
+        self.host = env['POSTGRES_HOST']
+        self.port = env['POSTGRES_PORT']
+        self.db = env['POSTGRES_DB']
+        self.user = env['POSTGRES_USER']
+        self.password = env['POSTGRES_PASSWORD']
 
+    @contextmanager
+    def get_connection(self, db: str | None = None) -> Generator[connection, None, None]:
+        conn = psycopg2.connect(
+            host=self.host,
+            port=self.port,
+            user=self.user,
+            password=self.password,
+            database=db or self.db
+        )
+        try:
+            yield conn
+            conn.commit()
+        finally:
+            conn.close()
+
+    def _execute(self,
+                query: str,
+                params: tuple | None = None,
+                fetch: bool = True,
+                ) -> list[Any]:
+
+        with self.get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                if fetch:
+                    return cur.fetchall()
+                return []
+
+    def execute(self, query_template: str):
+        template = Template(query_template)
+        query = template.safe_substitute(self._env)
+        
+        self._execute(query, None, False)
+
+
+@service('postgres')
+def setup_postgres(env: dict):
     # postgres
-    mkdir('postgres/data')
-    mkdir('postgres/init')
-    copy('postgres/init/services.sql', env)
+    mkdir("postgres/data")
+    mkdir("postgres/init")
+    copy("postgres/init/services.sql", env)
 
+
+@service('traefik')
+def setup_traefik(env):
     # traefik
-    mkdir('traefik/config')
-    touch('traefik/acme.json', mode=0o600)
-    copy('traefik/traefik.yml', env)
-    copy('traefik/usersfile', env)
-    copy('traefik/config/middlewares.yml', env)
-    copy('traefik/config/routers.yml', env)
-    copy('traefik/config/tls.yml', env, is_template=False)
+    env["T_ADMIN_PASSWORD_HASH"] = create_password(env["T_ADMIN_PASSWORD"])
 
+    mkdir("traefik/config")
+    touch("traefik/acme.json", mode=0o600)
+    copy("traefik/traefik.yml", env)
+    copy("traefik/usersfile", env)
+    copy("traefik/config/middlewares.yml", env)
+    copy("traefik/config/routers.yml", env)
+    copy("traefik/config/tls.yml", env, is_template=False)
+
+
+@service('matrix')
+def setup_matrix(env: dict):
     # matrix
-    mkdir('matrix/synapse')
-    copy('matrix/synapse/homeserver.yaml', env)
+    mkdir("matrix/synapse")
+    copy("matrix/synapse/homeserver.yaml", env)
 
     # matrix nginx
-    mkdir('matrix/nginx/www/.well-known/matrix')
-    copy('matrix/nginx/matrix.conf', env)
-    copy('matrix/nginx/www/.well-known/matrix/client', env)
-    copy('matrix/nginx/www/.well-known/matrix/server', env)
+    mkdir("matrix/nginx/www/.well-known/matrix")
+    copy("matrix/nginx/matrix.conf", env)
+    copy("matrix/nginx/www/.well-known/matrix/client", env)
+    copy("matrix/nginx/www/.well-known/matrix/server", env)
 
 
+@service('matrix', DBS)
+def setup_matrix_db(env: dict):
+    query = """
+    CREATE ROLE ${MATRIX_POSTGRES_USER};
+    ALTER ROLE ${MATRIX_POSTGRES_USER} WITH PASSWORD '${MATRIX_DB_ROLE_PASSWORD}';
+    ALTER ROLE ${MATRIX_POSTGRES_USER} WITH LOGIN;
+    CREATE DATABASE ${MATRIX_POSTGRES_DB} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${MATRIX_POSTGRES_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${MATRIX_POSTGRES_DB} TO ${MATRIX_POSTGRES_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
+@service('trilium')
+def setup_trilium(env):
+    # trilium
+    mkdir("trilium/trilium-data")
+
+
+@service('qbittorrent')
+def setup_qbittorrent(env):
     # qbittorrent
     mkdir("qbittorrent/config")
 
+
+@service('gitea')
+def setup_gitea(env):
+    pass
+
+
+def main():
+    env_path = ROOT_DIR / ".env"
+    env = load_env(env_path)
+
+
+    parser = ArgumentParser(prog='Docker setup')
+
+    parser.add_argument('--setup', choices=list(SERVICES.keys()))
+    parser.add_argument('--setup_db', choices=list(DBS.keys()))
+    parser.add_argument('--gen_sample_env', action='store_true')
+
+    args = parser.parse_args()
+
+
+    if args.gen_sample_env:
+        gen_sample_env(env_path)
+
+    
+    if (service_to_setup := args.setup):
+        for setup_func in SERVICES[service_to_setup]:
+            setup_func(env)
+
+    
+    if (db_to_setup := args.setup_db):
+        for setup_db in DBS[db_to_setup]:
+            setup_db(env)
+
 if __name__ == "__main__":
     main()
+

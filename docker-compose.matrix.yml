@@ -2,7 +2,6 @@
 
 networks:
   default:  
-    # external: true
     name: "${INTERNAL_NETWORK}"
 
 services:
@@ -26,6 +25,8 @@ services:
       - "traefik.http.routers.synapse.rule=Host(`synapse.${DOMAIN_NAME}`)"
       - "traefik.http.routers.synapse.entrypoints=web-secure"
       - "traefik.http.routers.synapse.tls.certresolver=letsencrypt"
+    depends_on:
+      - "${POSTGRES_HOST}"
 
   nginx:
     image: "nginx:${MATRIX_NGINX_VERSION}"

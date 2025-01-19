@@ -1,12 +1,7 @@
-# version: "3.8"
 
 networks:
   default:
     name: "${INTERNAL_NETWORK}"
-    attachable: true
-    ipam:
-     config:
-       - subnet: "${SUBNET_AND_MASK}"
 
 services:
   qbittorrent:

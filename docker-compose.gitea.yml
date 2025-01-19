@@ -1,0 +1,25 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  gitea:
+    image: "docker.io/gitea/gitea:${GITEA_VERSION}"
+    environment:
+      - "USER_UID=1000"
+      - "USER_GID=1000"
+      - "GITEA__database__DB_TYPE=postgres"
+      - "GITEA__database__HOST=${POSTGRES_DB}:${POSTGRES_PORT}"
+      - "GITEA__database__NAME=${GITEA_DB_NAME}"
+      - "GITEA__database__USER=${GITEA_USER_NAME}"
+      - "GITEA__database__PASSWD=${GITEA_PASSWORD}"
+    volumes:
+      - "./data/gitea/data:/data"
+    ports:
+      - "${GITEA_WEB_PORT}:3000"
+      - "${GITEA_SSH_PORT}:22"
+    restart: unless-stopped
+    depends_on:
+      - "${POSTGRES_HOST}"
+

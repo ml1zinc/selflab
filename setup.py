@@ -10,8 +10,7 @@ from argparse import ArgumentParser
 from functools import wraps
 from contextlib import contextmanager
 
-import psycopg2
-from psycopg2.extensions import connection
+import psycopg
 
 
 ROOT_DIR = Path(__file__).parent
@@ -116,48 +115,66 @@ def create_password(password: str) -> str:
 
 
 class PostgresExecutor:
-    def __init__(self, env: dict):
+    def __init__(self, env: dict, run_out_docker: bool = True):
         self._env = env
 
-        self.host = env['POSTGRES_HOST']
-        self.port = env['POSTGRES_OUT_PORT']
+        self.host = 'localhost' if run_out_docker else env['POSTGRES_HOST']
+        self.port = env['POSTGRES_OUT_PORT'] if run_out_docker else env["POSTGRES_PORT"]
         self.db = env['POSTGRES_DB']
         self.user = env['POSTGRES_USER']
         self.password = env['POSTGRES_PASSWORD']
 
     @contextmanager
-    def get_connection(self, db: str | None = None) -> Generator[connection, None, None]:
-        conn = psycopg2.connect(
+    def get_connection(self, db: str | None = None, autocommit: bool = False) -> Generator[psycopg.Connection, None, None]:
+        conn = psycopg.connect(
             host=self.host,
             port=self.port,
             user=self.user,
             password=self.password,
-            database=db or self.db
+            dbname=db or self.db,
+            autocommit=autocommit
         )
         try:
             yield conn
-            conn.commit()
+            if not autocommit:
+                conn.commit()
         finally:
             conn.close()
 
     def _execute(self,
-                query: str,
-                params: tuple | None = None,
-                fetch: bool = True,
+                 query: str,
+                 params: tuple | None = None,
+                 fetch: bool = False,
+                 autocommit: bool = False
                 ) -> list[Any]:
 
-        with self.get_connection() as conn:
+        with self.get_connection(autocommit=autocommit) as conn:
             with conn.cursor() as cur:
                 cur.execute(query, params)
-                if fetch:
+                if fetch and cur.description:
                     return cur.fetchall()
                 return []
 
     def execute(self, query_template: str):
         template = Template(query_template)
         query = template.safe_substitute(self._env)
-        
-        self._execute(query, None, False)
+
+        statements = [q.strip() for q in query.split(';') if q.strip()]
+        for statement in statements:
+            is_need_autocommit = any(cmd in statement.upper() for cmd in (
+                'CREATE DATABASE',
+                'DROP DATABASE',
+                'ALTER SYSTEM'
+            ))
+
+            try:
+                self._execute(
+                    statement,
+                    autocommit=is_need_autocommit
+                )
+            except Exception as e:
+                print(f"Error executing '{statement}': {e}")
+                raise
 
 
 @service('postgres')

@@ -222,9 +222,24 @@ def setup_qbittorrent(env):
 
 
 @service('gitea')
-def setup_gitea(env):
-    pass
+def setup_gitea(env: dict):
+    # gitea
+    mkdir("gitea/data")
 
+
+@service('gitea', DBS)
+def setup_gitea_db(env: dict):
+    query = """
+    CREATE ROLE ${GITEA_USER_NAME};
+    ALTER ROLE ${GITEA_USER_NAME} WITH PASSWORD '${GITEA_PASSWORD}';
+    ALTER ROLE ${GITEA_USER_NAME} WITH LOGIN;
+    CREATE DATABASE ${GITEA_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${GITEA_USER_NAME};
+    GRANT ALL PRIVILEGES ON DATABASE ${GITEA_DB_NAME} TO ${GITEA_USER_NAME};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+    
 
 def main():
     env_path = ROOT_DIR / ".env"

@@ -120,7 +120,7 @@ class PostgresExecutor:
         self._env = env
 
         self.host = env['POSTGRES_HOST']
-        self.port = env['POSTGRES_PORT']
+        self.port = env['POSTGRES_OUT_PORT']
         self.db = env['POSTGRES_DB']
         self.user = env['POSTGRES_USER']
         self.password = env['POSTGRES_PASSWORD']

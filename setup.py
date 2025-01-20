@@ -258,6 +258,26 @@ def setup_gitea_db(env: dict):
     psql.execute(query)
     
 
+@service('linkwarden')
+def setup_linkwarden(env: dict):
+    mkdir("linkwarden/data")
+
+
+@service('linkwarden', DBS)
+def setup_linkwarden_db(env: dict):
+    # linkwarden
+    query = """
+    CREATE ROLE ${LINKWARDEN_PSQL_USER};
+    ALTER ROLE ${LINKWARDEN_PSQL_USER} WITH PASSWORD '${LINKWARDEN_PSQL_PASSWORD}';
+    ALTER ROLE ${LINKWARDEN_PSQL_USER} WITH LOGIN;
+    CREATE DATABASE ${LINKWARDEN_PSQL_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${LINKWARDEN_PSQL_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${LINKWARDEN_PSQL_DB_NAME} TO ${LINKWARDEN_PSQL_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

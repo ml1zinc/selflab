@@ -8,8 +8,9 @@ services:
     image: "ghcr.io/linkwarden/linkwarden:${LINKWARDEN_VERSION}"
     environment:
     - "DATABASE_URL=postgresql://${LINKWARDEN_PSQL_USER}:${LINKWARDEN_PSQL_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${LINKWARDEN_PSQL_DB_NAME}"
+    - "NEXTAUTH_SECRET=${NEXTAUTH_SECRET}"
     volumes:
-      - "./data/linkwarden/data:/data"
+      - "./data/linkwarden/data:/data/data"
     ports:
       - "${LINKWARDEN_PORT}:3000"
     restart: unless-stopped

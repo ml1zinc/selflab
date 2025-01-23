@@ -284,6 +284,13 @@ def setup_grafana(env: dict):
     copy('grafana/datasources/datasource.yml', env)
 
 
+@service('prometheus')
+def setup_prometheus(env: dict):
+    mkdir('prometheus/config')
+    mkdir('prometheus/data')
+    copy('prometheus/config/prometheus.yml', env)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

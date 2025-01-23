@@ -1,0 +1,17 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  prometheus:
+    image: prom/prometheus
+    # container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    restart: unless-stopped
+    volumes:
+      - ./data/prometheus/config:/etc/prometheus
+      - ./data/prometheus/data:/prometheus

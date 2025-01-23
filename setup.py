@@ -278,6 +278,12 @@ def setup_linkwarden_db(env: dict):
     psql.execute(query)
 
 
+@service('grafana')
+def setup_grafana(env: dict):
+    mkdir('grafana/datasources')
+    copy('grafana/datasources/datasource.yml', env)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

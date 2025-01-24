@@ -15,3 +15,17 @@ services:
     volumes:
       - "./data/prometheus/config:/etc/prometheus"
       - "./data/prometheus/data:/prometheus"
+
+  node_exporter:
+    image: "quay.io/prometheus/node-exporter:${PROMETHEUS_NODE_VERSION}"
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+    network_mode: host
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - "/proc:/host/proc:ro"
+      - "/sys:/host/sys:ro"
+      - "/:/host:ro,rslave"

@@ -287,7 +287,8 @@ def setup_grafana(env: dict):
 @service('prometheus')
 def setup_prometheus(env: dict):
     mkdir('prometheus/config')
-    mkdir('prometheus/data')
+    mkdir('prometheus/data', mode=0o0777)
+    print('NEED TO EXEC: "sudo chown -R 65534:65534 ./data/prometheus/data"')
     copy('prometheus/config/prometheus.yml', env)
 
 

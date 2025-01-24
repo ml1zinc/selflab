@@ -3,15 +3,15 @@ networks:
   default:
     name: "${INTERNAL_NETWORK}"
 
-service:
+services:
   grafana:
-    image: grafana/grafana
+    image: "grafana/grafana:${GRAFANA_VERSION}"
     # container_name: grafana
     ports:
-      - "${GRAFANA_VERSION}:3000"
+      - "${GRAFANA_PORT}:3000"
     restart: unless-stopped
     environment:
       - "GF_SECURITY_ADMIN_USER=${GRAFANA_USER}"
       - "GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}"
     volumes:
-      - ./data/grafana/datasources:/etc/grafana/provisioning/datasources
+      - "./data/grafana/datasources:/etc/grafana/provisioning/datasources"

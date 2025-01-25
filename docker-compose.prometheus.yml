@@ -19,13 +19,3 @@ services:
       - "./data/prometheus/config:/etc/prometheus"
       - "./data/prometheus/data:/prometheus"
 
-  node_exporter:
-    image: "quay.io/prometheus/node-exporter:${PROMETHEUS_NODE_VERSION}"
-    command:
-      - '--path.procfs=/host/proc'
-      - '--path.sysfs=/host/sys'
-    pid: host
-    restart: unless-stopped
-    volumes:
-      - "/proc:/host/proc:ro"
-      - "/sys:/host/sys:ro"

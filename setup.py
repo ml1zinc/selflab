@@ -292,6 +292,11 @@ def setup_prometheus(env: dict):
     copy('prometheus/config/prometheus.yml', env)
 
 
+@service('calibre')
+def setup_calibre(env: dict):
+    mkdir('calibre/config')
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

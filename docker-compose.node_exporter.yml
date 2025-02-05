@@ -1,0 +1,18 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  node_exporter:
+    image: "quay.io/prometheus/node-exporter:${PROMETHEUS_NODE_VERSION}"
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+    pid: host
+    restart: unless-stopped
+    ports:
+      - "${NODE_EXPORTER_PORT}:9100"
+    volumes:
+      - "/proc:/host/proc:ro"
+      - "/sys:/host/sys:ro"

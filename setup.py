@@ -278,6 +278,20 @@ def setup_linkwarden_db(env: dict):
     psql.execute(query)
 
 
+@service('grafana')
+def setup_grafana(env: dict):
+    mkdir('grafana/datasources')
+    copy('grafana/datasources/datasource.yml', env)
+
+
+@service('prometheus')
+def setup_prometheus(env: dict):
+    mkdir('prometheus/config')
+    mkdir('prometheus/data', mode=0o0777)
+    print('NEED TO EXEC: "sudo chown -R 65534:65534 ./data/prometheus/data"')
+    copy('prometheus/config/prometheus.yml', env)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

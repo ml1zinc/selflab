@@ -18,6 +18,7 @@ services:
       # - CLI_ARGS= #optional
     volumes:
       - "./data/calibre/config:/config"
+      - "${CALIBRE_BOOKS_PATH}:/books"
     ports:
       - "${CALIBRE_GUI_PORT}:8080"
       - "${CALIBRE_GUI_HTTPS_PORT}:8181"

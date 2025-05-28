@@ -256,6 +256,26 @@ def setup_gitea_db(env: dict):
     
     psql = PostgresExecutor(env)
     psql.execute(query)
+
+    
+@service('forgejo')
+def setup_forgejo(env: dict):
+    # forgejo
+    mkdir("forgejo/data")
+
+
+@service('forgejo', DBS)
+def setup_forgejo_db(env: dict):
+    query = """
+    CREATE ROLE ${FORGEJO_USER_NAME};
+    ALTER ROLE ${FORGEJO_USER_NAME} WITH PASSWORD '${FORGEJO_PASSWORD}';
+    ALTER ROLE ${FORGEJO_USER_NAME} WITH LOGIN;
+    CREATE DATABASE ${FORGEJO_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${FORGEJO_USER_NAME};
+    GRANT ALL PRIVILEGES ON DATABASE ${FORGEJO_DB_NAME} TO ${FORGEJO_USER_NAME};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
     
 
 @service('linkwarden')

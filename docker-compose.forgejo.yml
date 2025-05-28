@@ -1,0 +1,23 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  forgejo:
+    image: "codeberg.org/forgejo/forgejo:${FORGEJO_VERSION}"
+    environment:
+      - "USER_UID=1000"
+      - "USER_GID=1000"
+      - "FORGEJO__database__DB_TYPE=postgres"
+      - "FORGEJO__database__HOST=${POSTGRES_HOST}:${POSTGRES_PORT}"
+      - "FORGEJO__database__NAME=${FORGEJO_DB_NAME}"
+      - "FORGEJO__database__USER=${FORGEJO_USER_NAME}"
+      - "FORGEJO__database__PASSWD=${FORGEJO_PASSWORD}"
+    volumes:
+      - "./data/forgejo/data:/data"
+    ports:
+      - "${FORGEJO_WEB_PORT}:3000"
+      - "${FORGEJO_SSH_PORT}:22"
+    restart: unless-stopped
+

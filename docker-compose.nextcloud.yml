@@ -1,0 +1,14 @@
+services:
+  nextcloud:
+    image: "nextcloud:${NEXTCLOUD_VERSION}"
+    environment:
+      - "POSTGRES_PASSWORD=${NEXTCLOUD_PG_PASSWORD}"
+      - "POSTGRES_DATABASE=${NEXTCLOUD_PG_DB}"
+      - "POSTGRES_USER=${NEXTCLOUD_PG_USER}"
+      - "POSTGRES_HOST=${POSTGRES_HOST}:${POSTGRES_PORT}"
+    volumes:
+      - "./data/nextcloud/data:/var/www/html"
+    ports:
+      - "${NEXTCLOUD_WEB_PORT}:80"
+    restart: always
+

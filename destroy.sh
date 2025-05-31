@@ -13,7 +13,7 @@ if [ ! -f $DEPLOY_FILE ]; then
     echo "No deploy file(${DEPLOY_FILE}) for service: \"${SERVICE}\""
 
 else
-    echo "Start: \"${SERVICE}\" from ${DEPLOY_FILE}"
+    echo "Stop: \"${SERVICE}\" from ${DEPLOY_FILE}"
 fi
 
 

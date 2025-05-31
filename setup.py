@@ -317,6 +317,26 @@ def setup_calibre(env: dict):
     mkdir('calibre/config')
 
 
+@service('nextcloud')
+def setup_nextcloud(env: dict):
+    # nextcloud
+    mkdir("nextcloud/data")
+
+
+@service('nextcloud', DBS)
+def setup_nextcloud_db(env: dict):
+    query = """
+    CREATE ROLE ${NEXTCLOUD_PG_USER};
+    ALTER ROLE ${NEXTCLOUD_PG_USER} WITH PASSWORD '${NEXTCLOUD_PG_PASSWORD}';
+    ALTER ROLE ${NEXTCLOUD_PG_USER} WITH LOGIN;
+    CREATE DATABASE ${NEXTCLOUD_PG_DB} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${NEXTCLOUD_PG_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${NEXTCLOUD_PG_DB} TO ${NEXTCLOUD_PG_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

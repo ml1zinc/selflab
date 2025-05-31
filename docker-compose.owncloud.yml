@@ -38,6 +38,7 @@ services:
   valkey:
     image: valkey/valkey:${OWNCLOUD_VALKEY}
     container_name: owncloud_valkey
-
+    restart: always
+    command: ["--databases", "1"]
     volumes:
       - "./data/owncloud_valkey/data:/data"

@@ -336,6 +336,26 @@ def setup_nextcloud_db(env: dict):
     psql = PostgresExecutor(env)
     psql.execute(query)
 
+@service('owncloud')
+def setup_owncloud(env: dict):
+    # owncloud
+    mkdir("owncloud/data")
+    mkdir("owncloud_valkey/data")
+
+
+@service('owncloud', DBS)
+def setup_owncloud_db(env: dict):
+    query = """
+    CREATE ROLE ${OWNCLOUD_PG_USER};
+    ALTER ROLE ${OWNCLOUD_PG_USER} WITH PASSWORD '${OWNCLOUD_PG_PASSWORD}';
+    ALTER ROLE ${OWNCLOUD_PG_USER} WITH LOGIN;
+    CREATE DATABASE ${OWNCLOUD_PG_DB} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${OWNCLOUD_PG_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${OWNCLOUD_PG_DB} TO ${OWNCLOUD_PG_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
 
 def main():
     env_path = ROOT_DIR / ".env"

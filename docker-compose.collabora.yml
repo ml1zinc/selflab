@@ -1,0 +1,18 @@
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  collabora:
+    image: "collabora/code:${COLLABORA_VERSION}"
+    container_name: collabora
+    ports:
+        - "${COLLABORA_PORT}:9980"
+    restart: unless-stopped
+    volumes:
+        - "./data/collabora/data:/etc/coolwsd/"
+    environment:
+        - username=${COLLABORA_USERNAME}
+        - password=${COLLABORA_PASSWORD}
+        - dictionaries=en_US ru ua
+        - extra_params=${COLLABORA_EXTRA}

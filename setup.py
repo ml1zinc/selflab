@@ -360,7 +360,8 @@ def setup_owncloud_db(env: dict):
 @service('collabora')
 def setup_collabora(env: dict):
     # collabora
-    mkdir("collabora/data")
+    mkdir("collabora/data", mode=0o755)
+    print('NEED TO EXEC: "sudo chown -R 101:101 ./data/collabora/data"')
 
 
 def main():

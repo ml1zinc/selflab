@@ -357,6 +357,12 @@ def setup_owncloud_db(env: dict):
     psql.execute(query)
 
 
+@service('collabora')
+def setup_collabora(env: dict):
+    # collabora
+    mkdir("collabora/data")
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

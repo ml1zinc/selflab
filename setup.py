@@ -364,6 +364,12 @@ def setup_collabora(env: dict):
     print('NEED TO EXEC: "sudo chown -R 101:101 ./data/collabora/data"')
 
 
+@service('syncthing')
+def setup_syncthing(env: dict):
+    # syncthing
+    mkdir("syncthing/data")
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

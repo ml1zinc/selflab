@@ -1,0 +1,31 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+version: "3"
+services:
+  syncthing:
+    image: "syncthing/syncthing:${SYNCTHING_VERSION}"
+    container_name: syncthing
+    # hostname: my-syncthing
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - "./data/syncthing/data:/var/syncthing"
+    ports:
+      - "${SYNCTHING_WEB_PORT}:8384" # Web UI
+      - "${SYNCTHING_TCP_PORT}:22000/tcp" # TCP file transfers
+      - "${SYNCTHING_TCP_PORT}:22000/udp" # QUIC file transfers
+      - "${SYNCTHING_LOCBR_PORT}:21027/udp" # Receive local discovery broadcasts
+
+    restart: unless-stopped
+    healthcheck:
+      test: curl -fkLsS -m 2 127.0.0.1:8384/rest/noauth/health | grep -o --color=never OK || exit 1
+      interval: 1m
+      timeout: 10s
+      retries: 3
+
+
+

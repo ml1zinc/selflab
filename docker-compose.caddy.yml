@@ -22,6 +22,7 @@ services:
       - FORGEJO_WEB_PORT="${FORGEJO_WEB_PORT}"
     volumes:
       - "./data/caddy/conf:/etc/caddy"
+      - "./data/caddy/certs:/certs"
       - "./data/caddy/site:/srv"
       - "./data/caddy/config:/config"
       - "./data/caddy/data:/data"

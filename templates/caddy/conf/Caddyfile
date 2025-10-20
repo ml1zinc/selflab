@@ -18,6 +18,8 @@
     dns desec {
         token {env.DESEC_TOKEN}
     }
+    propagation_timeout 300s
+    propagation_delay 120s
   }
 }
 

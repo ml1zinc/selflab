@@ -378,6 +378,7 @@ def setup_caddy(env: dict):
     mkdir("caddy/conf")
     mkdir("caddy/config")
     mkdir("caddy/log")
+    mkdir("caddy/certs")
 
     copy('caddy/conf/Caddyfile', env)
     copy('caddy/caddy.Dockerfile', env, is_template=False)

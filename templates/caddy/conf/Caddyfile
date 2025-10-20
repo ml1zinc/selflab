@@ -1,0 +1,50 @@
+{
+    # Global options
+    email {env.CADDY_EMAIL}  # For Let's Encrypt notifications
+    
+    # Uncomment to use staging for testing
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+(log) {
+  logging {
+    output file "/var/log/caddy/{args[0]}.log"
+    format json
+  }
+}
+
+(desec_dns) {
+  tls {
+    dns desec {
+        token {env.DESEC_TOKEN}
+    }
+  }
+}
+
+
+grafana.{env.DESEC_DOMAIN} {
+    # DNS challenge with DeSEC
+    import desec_dns
+
+    # Enable logging
+    import log grafana
+
+    # Reverse proxy to Grafana container
+    reverse_proxy grafana:${GRAFANA_PORT}
+}
+
+
+forgejo.{env.DESEC_DOMAIN} {
+    # DNS challenge with DeSEC
+    import desec_dns
+
+    # Enable logging
+    import log forgejo
+
+    # Reverse proxy to Grafana container
+    reverse_proxy forgejo:${FORGEJO_WEB_PORT}
+
+}
+
+
+

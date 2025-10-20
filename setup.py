@@ -370,6 +370,19 @@ def setup_syncthing(env: dict):
     mkdir("syncthing/data")
 
 
+@service('caddy')
+def setup_caddy(env: dict):
+    # caddy
+    mkdir("caddy/data")
+    mkdir("caddy/site")
+    mkdir("caddy/conf")
+    mkdir("caddy/config")
+    mkdir("caddy/log")
+
+    copy('caddy/conf/Caddyfile', env)
+    copy('caddy/caddy.Dockerfile', env, is_template=False)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

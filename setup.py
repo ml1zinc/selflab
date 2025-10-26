@@ -255,7 +255,7 @@ def setup_trilium_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['TRILIUM_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 @service('qbittorrent')
 def setup_qbittorrent(env: dict):
@@ -267,7 +267,7 @@ def setup_qbittorrent_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['WEBUI_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 @service('gitea')
 def setup_gitea(env: dict):
@@ -314,7 +314,7 @@ def setup_forgejo_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['FORGEJO_WEB_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
     
 
 @service('linkwarden')
@@ -341,7 +341,7 @@ def setup_linkwarden_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['LINKWARDEN_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 @service('grafana')
 def setup_grafana(env: dict):
@@ -353,7 +353,7 @@ def setup_grafana_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['GRAFANA_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 
 @service('prometheus')
@@ -368,7 +368,7 @@ def setup_prometheus_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['PROMETHEUS_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 
 @service('calibre')
@@ -380,7 +380,7 @@ def setup_calibre_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['CALIBRE_GUI_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 @service('nextcloud')
 def setup_nextcloud(env: dict):
@@ -439,7 +439,7 @@ def setup_syncthing_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['SYNCTHING_WEB_PORT'])
-    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddy', data=config)
 
 @service('caddy')
 def setup_caddy(env: dict):

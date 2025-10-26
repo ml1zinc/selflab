@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from collections.abc import Callable
+from enum import StrEnum
 from typing import Any, Generator
 import bcrypt
 import os
+import inspect
 from string import Template
 from pathlib import Path
 from argparse import ArgumentParser
@@ -19,12 +21,16 @@ UID = 1000
 
 SERVICES: dict[str, list[Callable]] = {'all': []}
 DBS: dict[str, list[Callable]] = {'all': []}
+CADDY: dict[str, list[Callable]] = {'all': []}
 
 def service(service_name: str, service_dict: dict = SERVICES):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
             print(f'Setup {service_name}')
+            if 'service' in inspect.signature(func).parameters.keys():
+                kwargs['service'] = service_name
+
             func(*args, **kwargs)
             print(f'Complete {service_name}')
 
@@ -96,12 +102,17 @@ def copy(
             os.chown(dst, uid, gid)
 
 
-def touch(file: str | Path, uid=UID, gid=UID, mode=0o644):
+def create_file(file: str | Path, uid=UID, gid=UID, mode=0o644, data: str | None = None):
     dst = get_dst(file)
     if not dst.exists():
+        dst.parent.mkdir(mode=mode, parents=True, exist_ok=True)
         open(dst, "w").close()
         dst.chmod(mode)
         os.chown(dst, uid, gid)
+
+    if data:
+        with open(dst, 'w') as fd:
+            fd.write(data)
 
 
 def mkdir(file: str | Path, uid=UID, gid=UID, mode=0o755):
@@ -177,6 +188,14 @@ class PostgresExecutor:
                 raise
 
 
+class CaddyTemplates(StrEnum):
+    BasicTmp = r"""import logs {service}
+@{service} host {service}.{{$DESEC_DOMAIN}}
+handle @{service} {{
+        reverse_proxy {server_ip}:{service_port}
+}}
+    """
+
 @service('postgres')
 def setup_postgres(env: dict):
     # postgres
@@ -191,7 +210,7 @@ def setup_traefik(env: dict):
     env["T_ADMIN_PASSWORD_HASH"] = create_password(env["T_ADMIN_PASSWORD"])
 
     mkdir("traefik/config")
-    touch("traefik/acme.json", mode=0o600)
+    create_file("traefik/acme.json", mode=0o600)
     copy("traefik/traefik.yml", env)
     copy("traefik/usersfile", env)
     copy("traefik/config/middlewares.yml", env)
@@ -231,12 +250,24 @@ def setup_trilium(env: dict):
     # trilium
     mkdir("trilium/data")
 
+@service('trilium', CADDY)
+def setup_trilium_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['TRILIUM_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 @service('qbittorrent')
 def setup_qbittorrent(env: dict):
     # qbittorrent
     mkdir("qbittorrent/config")
 
+@service('qbittorrent', CADDY)
+def setup_qbittorrent_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['WEBUI_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 @service('gitea')
 def setup_gitea(env: dict):
@@ -276,6 +307,14 @@ def setup_forgejo_db(env: dict):
     
     psql = PostgresExecutor(env)
     psql.execute(query)
+
+
+@service('forgejo', CADDY)
+def setup_forgejo_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['FORGEJO_WEB_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
     
 
 @service('linkwarden')
@@ -297,11 +336,24 @@ def setup_linkwarden_db(env: dict):
     psql = PostgresExecutor(env)
     psql.execute(query)
 
+@service('linkwarden', CADDY)
+def setup_linkwarden_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['LINKWARDEN_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 @service('grafana')
 def setup_grafana(env: dict):
     mkdir('grafana/datasources')
     copy('grafana/datasources/datasource.yml', env)
+
+@service('grafana', CADDY)
+def setup_grafana_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['GRAFANA_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 
 @service('prometheus')
@@ -311,11 +363,24 @@ def setup_prometheus(env: dict):
     print('NEED TO EXEC: "sudo chown -R 65534:65534 ./data/prometheus/data"')
     copy('prometheus/config/prometheus.yml', env)
 
+@service('prometheus', CADDY)
+def setup_prometheus_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['PROMETHEUS_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
+
 
 @service('calibre')
 def setup_calibre(env: dict):
     mkdir('calibre/config')
 
+@service('calibre', CADDY)
+def setup_calibre_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['CALIBRE_GUI_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 @service('nextcloud')
 def setup_nextcloud(env: dict):
@@ -369,6 +434,12 @@ def setup_syncthing(env: dict):
     # syncthing
     mkdir("syncthing/data")
 
+@service('syncthing', CADDY)
+def setup_syncthing_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['SYNCTHING_WEB_PORT'])
+    create_file(f'caddy/conf/{env['DESEC_DOMAIN']}/{service}.caddy', data=config)
 
 @service('caddy')
 def setup_caddy(env: dict):
@@ -393,6 +464,7 @@ def main():
 
     parser.add_argument('--setup', choices=list(SERVICES.keys()))
     parser.add_argument('--setup_db', choices=list(DBS.keys()))
+    parser.add_argument('--setup_caddy', choices=list(CADDY.keys()))
     parser.add_argument('--gen_sample_env', action='store_true')
 
     args = parser.parse_args()
@@ -410,6 +482,10 @@ def main():
     if (db_to_setup := args.setup_db):
         for setup_db in DBS[db_to_setup]:
             setup_db(env)
+
+    if (caddy_setup := args.setup_caddy):
+        for setup_caddy in CADDY[caddy_setup]:
+            setup_caddy(env)
 
 if __name__ == "__main__":
     main()

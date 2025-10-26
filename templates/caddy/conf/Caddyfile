@@ -1,52 +1,35 @@
 {
-    # Global options
-    email {env.CADDY_EMAIL}  # For Let's Encrypt notifications
-    
-    # Uncomment to use staging for testing
-    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+        # Global options
+        email {$CADDY_EMAIL} # For Let's Encrypt notifications
+        # Uncomment to use staging for testing
+        # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
 }
 
-(log) {
-  logging {
-    output file "/var/log/caddy/{args[0]}.log"
-    format json
-  }
+(logs) {
+        log {args[0]} {
+                output file /var/log/caddy/{args[0]}.log
+                format json
+        }
 }
 
 (desec_dns) {
-  tls {
-    dns desec {
-        token {env.DESEC_TOKEN}
-    }
-    propagation_timeout 300s
-    propagation_delay 120s
-  }
+        tls {
+                dns desec {
+                        token {$DESEC_TOKEN}
+                }
+                propagation_timeout 300s
+                propagation_delay 120s
+        }
 }
 
+*.{$DESEC_DOMAIN} {
+        import desec_dns
 
-grafana.{env.DESEC_DOMAIN} {
-    # DNS challenge with DeSEC
-    import desec_dns
+        import {$DESEC_DOMAIN}/*
 
-    # Enable logging
-    import log grafana
-
-    # Reverse proxy to Grafana container
-    reverse_proxy grafana:${GRAFANA_PORT}
+        import logs unknown_access
+        handle {
+                respond "Access Denied - VPN Required" 403
+        }
 }
-
-
-forgejo.{env.DESEC_DOMAIN} {
-    # DNS challenge with DeSEC
-    import desec_dns
-
-    # Enable logging
-    import log forgejo
-
-    # Reverse proxy to Grafana container
-    reverse_proxy forgejo:${FORGEJO_WEB_PORT}
-
-}
-
-
 

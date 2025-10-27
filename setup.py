@@ -421,6 +421,12 @@ def setup_owncloud_db(env: dict):
     psql = PostgresExecutor(env)
     psql.execute(query)
 
+@service('owncloud', CADDY)
+def setup_owncloud_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['OWNCLOUD_WEB_PORT'])
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)
 
 @service('collabora')
 def setup_collabora(env: dict):

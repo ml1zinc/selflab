@@ -466,6 +466,19 @@ def setup_caddy(env: dict):
     copy('caddy/conf/Caddyfile', env)
     copy('caddy/caddy.Dockerfile', env, is_template=False)
 
+@service('wgd')
+def setup_wgd(env: dict):
+    mkdir("wgdashboard/data")
+    mkdir("wgdashboard/aconf")
+    mkdir("wgdashboard/conf")
+
+@service('wgd', CADDY)
+def setup_wgd_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['WGD_WEB_PORT'])
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)
+
 
 def main():
     env_path = ROOT_DIR / ".env"

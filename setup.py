@@ -436,7 +436,7 @@ def setup_collabora(env: dict):
 
 @service('collabora', CADDY)
 def setup_collabora_caddy(env: dict, service: str):
-    config = CaddyTemplates.BasicTmp.format(service=service,
+    config = CaddyTemplates.BasicTmp.format(service='office',
                                    server_ip=env['WG_INTERNAL_SERVER'],
                                    service_port=env['COLLABORA_PORT'])
     create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)

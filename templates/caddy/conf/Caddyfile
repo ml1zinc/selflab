@@ -8,6 +8,7 @@
 
 (logs) {
         log {args[0]} {
+                hostnames {args[0]}
                 output file /var/log/caddy/{args[0]}.log
                 format json
         }

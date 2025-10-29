@@ -432,7 +432,7 @@ def setup_owncloud_caddy(env: dict, service: str):
 def setup_collabora(env: dict):
     # collabora
     mkdir("collabora/data", mode=0o755)
-    print('NEED TO EXEC: "sudo chown -R 101:101 ./data/collabora/data"')
+    print('NEED TO EXEC: "sudo chown -R 1001:1001 ./data/collabora/data"')
 
 @service('collabora', CADDY)
 def setup_collabora_caddy(env: dict, service: str):

@@ -9,11 +9,11 @@ services:
     ports:
         - "${COLLABORA_PORT}:9980"
     restart: unless-stopped
-    volumes:
-        - "./data/collabora/data:/etc/coolwsd/"
+    # volumes:
+    #     - "./data/collabora/data:/etc/coolwsd/"
     environment:
         - domain=owncloud.${DESEC_DOMAIN}
-        - server_name=collabora.${DESEC_DOMAIN}
+        - server_name=office.${DESEC_DOMAIN}
         - username=${COLLABORA_USERNAME}
         - password=${COLLABORA_PASSWORD}
         - dictionaries=en_US ru ua

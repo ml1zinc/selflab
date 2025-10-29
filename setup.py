@@ -434,6 +434,12 @@ def setup_collabora(env: dict):
     mkdir("collabora/data", mode=0o755)
     print('NEED TO EXEC: "sudo chown -R 101:101 ./data/collabora/data"')
 
+@service('collabora', CADDY)
+def setup_collabora_caddy(env: dict, service: str):
+    config = CaddyTemplates.BasicTmp.format(service=service,
+                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   service_port=env['COLLABORA_PORT'])
+    create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)
 
 @service('syncthing')
 def setup_syncthing(env: dict):

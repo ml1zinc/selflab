@@ -3,6 +3,7 @@
         email {$CADDY_EMAIL} # For Let's Encrypt notifications
         # Uncomment to use staging for testing
         # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+        admin off
 }
 
 (logs) {

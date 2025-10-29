@@ -1,0 +1,37 @@
+{
+        # Global options
+        email {$CADDY_EMAIL} # For Let's Encrypt notifications
+        # Uncomment to use staging for testing
+        # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+        admin off
+}
+
+(logs) {
+        log {args[0]} {
+                hostnames {args[0]}
+                output file /var/log/caddy/{args[0]}.log
+                format json
+        }
+}
+
+(desec_dns) {
+        tls {
+                dns desec {
+                        token {$DESEC_TOKEN}
+                }
+                propagation_timeout 300s
+                propagation_delay 120s
+        }
+}
+
+*.{$DESEC_DOMAIN} {
+        import desec_dns
+
+        import {$DESEC_DOMAIN}/*
+
+        import logs unknown_access
+        handle {
+                respond "Access Denied - VPN Required" 403
+        }
+}
+

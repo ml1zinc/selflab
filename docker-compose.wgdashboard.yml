@@ -3,13 +3,16 @@ networks:
     name: "${INTERNAL_NETWORK}"
 
 services:
-  collabora:
+  wgdashboard:
     image: "ghcr.io/wgdashboard/wgdashboard:${WGDASHBOARD_VERSION}"
     container_name: wgdashboard
     ports:
         - "${WGD_WEB_PORT}:10086/tcp"
         - "${WGD_PORT}:51280/udp"
     restart: unless-stopped
+    environment:
+        - username=${WGD_USERNAME}
+        - password=${WGD_PASSWORD}
     volumes:
       - "./data/wgdashboard/data:/data"
       - "./data/wgdashboard/conf:/etc/wireguard"

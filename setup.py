@@ -475,7 +475,7 @@ def setup_wgd(env: dict):
 @service('wgd', CADDY)
 def setup_wgd_caddy(env: dict, service: str):
     config = CaddyTemplates.BasicTmp.format(service=service,
-                                   server_ip=env['WG_INTERNAL_SERVER'],
+                                   server_ip=env['WG_BASE_SERVER'],
                                    service_port=env['WGD_WEB_PORT'])
     create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)
 

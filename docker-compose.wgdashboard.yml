@@ -1,0 +1,21 @@
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  wgdashboard:
+    image: "ghcr.io/wgdashboard/wgdashboard:${WGDASHBOARD_VERSION}"
+    container_name: wgdashboard
+    ports:
+        - "${WGD_WEB_PORT}:10086/tcp"
+        - "${WGD_PORT}:51820/udp"
+    restart: unless-stopped
+    environment:
+        - username=${WGD_USERNAME}
+        - password=${WGD_PASSWORD}
+    volumes:
+      - "./data/wgdashboard/data:/data"
+      - "./data/wgdashboard/conf:/etc/wireguard"
+      - "./data/wgdashboard/aconf:/etc/amnezia/amneziawg"
+    cap_add:
+      - NET_ADMIN

@@ -8,7 +8,7 @@ services:
     container_name: wgdashboard
     ports:
         - "${WGD_WEB_PORT}:10086/tcp"
-        - "${WGD_PORT}:51280/udp"
+        - "${WGD_PORT}:51820/udp"
     restart: unless-stopped
     environment:
         - username=${WGD_USERNAME}

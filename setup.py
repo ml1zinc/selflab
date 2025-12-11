@@ -485,17 +485,18 @@ def setup_wgd_caddy(env: dict, service: str):
 def setup_librechat(env: dict):
 
 
-    mkdir("librechat/conf", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
-    mkdir("librechat/internal_data/images", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
-    mkdir("librechat/internal_data/uploads", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
-    mkdir("librechat/internal_data/logs", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
+    print(f'RUN: "sudo chown -R {env['LIC_UID']}:{env['LIC_GID']} ./data/librechat/"')
+    mkdir("librechat/conf")
+    mkdir("librechat/internal_data/images")
+    mkdir("librechat/internal_data/uploads")
+    mkdir("librechat/internal_data/logs")
 
-    mkdir("librechat/mongo/data-node", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
-    mkdir("librechat/meili/meili_data_v1.12", uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
+    mkdir("librechat/mongo/data-node")
+    mkdir("librechat/meili/meili_data_v1.12")
     mkdir("librechat/vectordb/pgdata2")
 
-    copy('librechat/conf/.env.template', env, 'librechat/conf/.env', uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
-    copy('librechat/conf/librechat.yaml', env, uid=int(env['LIC_UID']), gid=int(env['LIC_GID']))
+    copy('librechat/conf/.env.template', env, 'librechat/conf/.env')
+    copy('librechat/conf/librechat.yaml', env)
 
 
 

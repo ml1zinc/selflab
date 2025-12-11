@@ -12,9 +12,10 @@ services:
       - rag_api
     image: "ghcr.io/danny-avila/librechat-api:${LIC_VERSION}"
     restart: always
-    user: "${LIC_UID}:${LIC_GID}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    env_file:
+      - "${LIC_PATH_PREFIX}/conf/.env"
     environment:
       - HOST=0.0.0.0
       - PORT=${LIC_PORT}
@@ -24,7 +25,7 @@ services:
       - RAG_API_URL=http://rag_api:${LIC_RAG_PORT:-8000}
     volumes:
       - type: bind
-        source: "${LIC_PATH_PREFIX}/conf/.env"
+        source: 
         target: /app/.env
       - type: bind
         source: "${LIC_PATH_PREFIX}/conf/librechat.yaml"

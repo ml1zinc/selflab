@@ -27,6 +27,7 @@ services:
       - type: bind
         source: "${LIC_PATH_PREFIX}/conf/librechat.yaml"
         target: /app/librechat.yaml
+      - "${LIC_PATH_PREFIX}/conf/.env:/app/.env"
       - ${LIC_PATH_PREFIX}/internal_data/images:/app/client/public/images
       - ${LIC_PATH_PREFIX}/internal_data/uploads:/app/uploads
       - ${LIC_PATH_PREFIX}/internal_data/logs:/app/logs

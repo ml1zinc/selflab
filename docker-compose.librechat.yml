@@ -25,9 +25,6 @@ services:
       - RAG_API_URL=http://rag_api:${LIC_RAG_PORT:-8000}
     volumes:
       - type: bind
-        source: 
-        target: /app/.env
-      - type: bind
         source: "${LIC_PATH_PREFIX}/conf/librechat.yaml"
         target: /app/librechat.yaml
       - ${LIC_PATH_PREFIX}/internal_data/images:/app/client/public/images

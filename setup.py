@@ -82,10 +82,10 @@ def get_src(path: str | Path) -> Path:
 
 
 def copy(
-    file: str | Path, env: dict, uid=UID, gid=UID, mode=0o644, is_template=True
+    file: str | Path, env: dict, dst_file: str | Path | None = None, uid=UID, gid=UID, mode=0o644, is_template=True
 ) -> None:
     src = get_src(file)
-    dst = get_dst(file)
+    dst = get_dst(dst_file or file)
     if not src.exists():
         print(f"[ERROR] Template: {src} not exists.")
         return
@@ -478,6 +478,25 @@ def setup_wgd_caddy(env: dict, service: str):
                                    server_ip=env['WG_BASE_SERVER'],
                                    service_port=env['WGD_WEB_PORT'])
     create_file(f'caddy/conf/{env["DESEC_DOMAIN"]}/{service}.caddyfile', data=config)
+
+
+
+@service('librechat')
+def setup_librechat(env: dict):
+
+
+    mkdir("librechat/conf", uid=env['LIC_UID'], gid=env['LIC_GID'])
+    mkdir("librechat/internal_data/images", uid=env['LIC_UID'], gid=env['LIC_GID'])
+    mkdir("librechat/internal_data/uploads", uid=env['LIC_UID'], gid=env['LIC_GID'])
+    mkdir("librechat/internal_data/logs", uid=env['LIC_UID'], gid=env['LIC_GID'])
+
+    mkdir("librechat/mongo/data-node", uid=env['LIC_UID'], gid=env['LIC_GID'])
+    mkdir("librechat/meili/meili_data_v1.12", uid=env['LIC_UID'], gid=env['LIC_GID'])
+    mkdir("librechat/vectordb/pgdata2")
+
+    copy('librechat/conf/.env.template', env, 'librechat/conf/.env', uid=env['LIC_UID'], gid=env['LIC_GID'])
+    copy('librechat/conf/librechat.yaml', env, uid=env['LIC_UID'], gid=env['LIC_GID'])
+
 
 
 def main():

@@ -5,7 +5,7 @@ networks:
 
 services:
   trilium:
-    image: "triliumnext/notes:${TRILIUM_VERSION}"
+    image: "triliumnext/trilium:${TRILIUM_VERSION}"
     restart: unless-stopped
     ports:
       - "${TRILIUM_PORT}:8080"

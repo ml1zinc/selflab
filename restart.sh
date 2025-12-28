@@ -13,9 +13,10 @@ if [ ! -f $DEPLOY_FILE ]; then
     echo "No file(${DEPLOY_FILE}) for service: \"${SERVICE}\""
 
 else
-    echo "Stop: \"${SERVICE}\" from ${DEPLOY_FILE}"
+    echo "Restart: \"${SERVICE}\" from ${DEPLOY_FILE}"
 fi
 
 
 docker-compose -p homelab_${SERVICE} -f ${DEPLOY_FILE} down
+docker-compose -p homelab_${SERVICE} -f ${DEPLOY_FILE} up --build -d
 

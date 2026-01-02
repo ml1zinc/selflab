@@ -499,6 +499,10 @@ def setup_librechat(env: dict):
     copy('librechat/conf/librechat.yaml', env)
 
 
+@service('valkey')
+def setup_valkey(env: dict):
+    # valkey
+    mkdir("valkey/data")
 
 def main():
     env_path = ROOT_DIR / ".env"

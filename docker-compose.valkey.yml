@@ -1,0 +1,13 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  trilium:
+    image: "valkey/valkey:${VALKEY_VERSION}"
+    restart: unless-stopped
+    ports:
+      - "${VALKEY_PORT}:6379"
+    volumes:
+      - "./data/valkey/data:/data"

@@ -516,6 +516,20 @@ def setup_forgejo_runner(env: dict):
     print('RUN: "sudo chmod g+s ./data/forgejo_runner/.cache"')
 
 
+@service('miniflux', DBS)
+def setup_miniflux_db(env: dict):
+    query = """
+    CREATE ROLE ${MINIFLUX_PSQL_USER};
+    ALTER ROLE ${MINIFLUX_PSQL_USER} WITH PASSWORD '${MINIFLUX_PSQL_PASSWORD}';
+    ALTER ROLE ${MINIFLUX_PSQL_USER} WITH LOGIN;
+    CREATE DATABASE ${MINIFLUX_PSQL_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${MINIFLUX_PSQL_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${MINIFLUX_PSQL_DB_NAME} TO ${MINIFLUX_PSQL_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

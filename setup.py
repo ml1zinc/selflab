@@ -529,6 +529,12 @@ def setup_miniflux_db(env: dict):
     psql = PostgresExecutor(env)
     psql.execute(query)
 
+@service('dhub')
+def setup_dhub(env: dict):
+    # dhub
+    mkdir("dhub/data")
+    mkdir("dhub/auth")
+
 
 def main():
     env_path = ROOT_DIR / ".env"

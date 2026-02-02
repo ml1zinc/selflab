@@ -3,6 +3,7 @@ networks:
   default:
     name: "${INTERNAL_NETWORK}"
 
+services:
   registry:
     image: "registry:${DHUB_VERSION}"
     ports:

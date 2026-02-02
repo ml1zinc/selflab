@@ -504,6 +504,18 @@ def setup_valkey(env: dict):
     # valkey
     mkdir("valkey/data")
 
+
+@service('forgejo_runner')
+def setup_forgejo_runner(env: dict):
+    # forgejo_runner
+    mkdir("forgejo_runner/data")
+    mkdir("forgejo_runner/data/.cache")
+
+    print(f'RUN: "sudo chown -R {env['FORGEJO_RUNNER_UID']}:{env['FORGEJO_RUNNER_GID']} ./data/forgejo_runner/"')
+    print('RUN: "sudo chmod 775 ./data/forgejo_runner/.cache"')
+    print('RUN: "sudo chmod g+s ./data/forgejo_runner/.cache"')
+
+
 def main():
     env_path = ROOT_DIR / ".env"
     env = load_env(env_path)

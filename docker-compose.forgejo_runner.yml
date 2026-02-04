@@ -12,7 +12,7 @@ services:
     restart: 'unless-stopped'
 
   runner:
-    image: "data.forgejo.org/forgejo/runner:${FORGEJO_RUNNER_VERSION}"
+    image: "code.forgejo.org/forgejo/runner:${FORGEJO_RUNNER_VERSION}"
     links:
       - docker-in-docker
     depends_on:

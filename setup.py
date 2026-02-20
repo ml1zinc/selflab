@@ -535,6 +535,24 @@ def setup_dhub(env: dict):
     mkdir("dhub/data")
     mkdir("dhub/auth")
 
+@service('dockhand')
+def setup_dockhand(env: dict):
+    # dockhand
+    mkdir("dockhand/data")
+
+@service('dockhand', DBS)
+def setup_dockhand_db(env: dict):
+    query = """
+    CREATE ROLE ${DOCKHAND_PSQL_USER};
+    ALTER ROLE ${DOCKHAND_PSQL_USER} WITH PASSWORD '${DOCKHAND_PSQL_PASSWORD}';
+    ALTER ROLE ${DOCKHAND_PSQL_USER} WITH LOGIN;
+    CREATE DATABASE ${DOCKHAND_PSQL_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${DOCKHAND_PSQL_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${DOCKHAND_PSQL_DB_NAME} TO ${DOCKHAND_PSQL_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
 
 def main():
     env_path = ROOT_DIR / ".env"

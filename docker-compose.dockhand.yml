@@ -1,0 +1,52 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+  socket-proxy:
+    internal: true
+
+services:
+  socket-proxy:
+    image: tecnativa/docker-socket-proxy
+    container_name: socket-proxy
+    restart: unless-stopped
+    environment:
+      # Required for Dockhand core functionality
+      - CONTAINERS=1
+      - IMAGES=1
+      - NETWORKS=1
+      - VOLUMES=1
+      - EVENTS=1
+      - POST=1
+      - DELETE=1
+      # Required for dashboard host info and disk usage
+      - INFO=1
+      - SYSTEM=1
+      # Required for vulnerability scanning
+      - ALLOW_START=1
+      - ALLOW_STOP=1
+      - ALLOW_RESTARTS=1
+      # Optional: enable for terminal access
+      # - EXEC=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - socket-proxy
+
+  dockhand:
+    image: "fnsys/dockhand:${DOCKHAND_VERSION}"
+    container_name: dockhand
+    restart: unless-stopped
+    depends_on:
+      - socket-proxy
+    ports:
+      - "${DOCKHAND_PORT}:3000"
+    environment:
+      - "DATABASE_URL=postgres://${DOCKHAND_PSQL_USER}:${DOCKHAND_PSQL_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${DOCKHAND_PSQL_DB_NAME}?sslmode=disable"
+    volumes:
+      - "./data/dockhand/data:/app/data"
+    networks:
+      - socket-proxy
+      - default
+
+

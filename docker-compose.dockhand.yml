@@ -10,6 +10,10 @@ services:
     image: tecnativa/docker-socket-proxy
     container_name: socket-proxy
     restart: unless-stopped
+    ulimits: # need be careful on update may broke
+      nofile:
+        soft: 10000
+        hard: 10000
     environment:
       # Required for Dockhand core functionality
       - CONTAINERS=1
@@ -41,8 +45,8 @@ services:
       - socket-proxy
     ports:
       - "${DOCKHAND_PORT}:3000"
-    environment:
-      - "DATABASE_URL=postgres://${DOCKHAND_PSQL_USER}:${DOCKHAND_PSQL_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${DOCKHAND_PSQL_DB_NAME}?sslmode=disable"
+    # environment: # may be will work in future
+    #   - "DATABASE_URL=postgres://${DOCKHAND_PSQL_USER}:${DOCKHAND_PSQL_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${DOCKHAND_PSQL_DB_NAME}?sslmode=disable"
     volumes:
       - "./data/dockhand/data:/app/data"
     networks:

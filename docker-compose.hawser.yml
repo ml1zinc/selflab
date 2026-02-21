@@ -1,0 +1,17 @@
+
+networks:
+  default:
+    name: "${INTERNAL_NETWORK}"
+
+services:
+  hawser:
+    image: "ghcr.io/finsys/hawser:${HAWSER_VERSION}"
+    container_name: hawser
+    restart: unless-stopped
+    ports:
+      - "${HAWSER_PORT}:2376"
+    environment:
+      - "TOKEN=${HAWSER_TOKEN}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+

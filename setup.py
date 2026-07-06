@@ -555,6 +555,25 @@ def setup_dockhand_db(env: dict):
     psql = PostgresExecutor(env)
     psql.execute(query)
 
+@service('readeck')
+def setup_readeck(env: dict):
+    # readeck
+    mkdir("readeck/data")
+
+@service('readeck', DBS)
+def setup_readeck_db(env: dict):
+    query = """
+    CREATE ROLE ${READECK_PSQL_USER};
+    ALTER ROLE ${READECK_PSQL_USER} WITH PASSWORD '${READECK_PSQL_PASSWORD}';
+    ALTER ROLE ${READECK_PSQL_USER} WITH LOGIN;
+    CREATE DATABASE ${READECK_PSQL_DB_NAME} ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' template=template0 OWNER ${READECK_PSQL_USER};
+    GRANT ALL PRIVILEGES ON DATABASE ${READECK_PSQL_DB_NAME} TO ${READECK_PSQL_USER};
+    """
+    
+    psql = PostgresExecutor(env)
+    psql.execute(query)
+
+
 
 def main():
     env_path = ROOT_DIR / ".env"

@@ -1,3 +1,21 @@
 version: 1.2.8
 # This setting caches the config file for faster loading across app lifecycle
 cache: true
+
+endpoints:
+  agents:
+    allowedProviders:
+    - OpenRouter
+  custom:
+    - name: "OpenRouter"
+      apiKey: "${OPENROUTER_KEY}" # NOT OPENROUTER_API_KEY
+      baseURL: "https://openrouter.ai/api/v1"
+      models:
+        default: ["openai/gpt-5.1"]
+        fetch: true
+      titleConvo: true
+      titleModel: "openai/gpt-5.1"
+      # Recommended: Drop the stop parameter from the request as Openrouter models use a variety of stop tokens.
+      dropParams: ["stop"]
+      modelDisplayLabel: "OpenRouter"
+

@@ -574,6 +574,13 @@ def setup_readeck_db(env: dict):
     psql.execute(query)
 
 
+@service('cwa')
+def setup_cwa(env: dict):
+    # cwa
+    mkdir("cwa/config")
+    mkdir("cwa/ingest")
+    mkdir("cwa/library")
+    mkdir("cwa/plugins")
 
 def main():
     env_path = ROOT_DIR / ".env"
